@@ -7,7 +7,7 @@ import {
   Message,
   Button
 } from 'semantic-ui-react'
-/*import {
+import {
   Stitch,
   UserPasswordCredential,
   RemoteMongoClient
@@ -15,7 +15,7 @@ import {
 import {
   AwsServiceClient,
   AwsRequest
-} from 'mongodb-stitch-browser-services-aws'*/
+} from 'mongodb-stitch-browser-services-aws'
 import BSON from 'bson'
 
 import Login from './components/Login'
@@ -52,7 +52,7 @@ class App extends Component {
     super(props)
     // Exercise 2
     // TODO: Paste your Stitch App ID from the Stitch Admin Console here.
-    this.appId = ''
+    this.appId = 'picstream-gvthu'
 
     this.state = {
       isAuthed: false,
@@ -62,8 +62,7 @@ class App extends Component {
   }
 
   componentDidMount = async () => {
-    // Exercise 2
-    // TODO: Initialize the Stitch App Client
+    this.client = Stitch.initializeAppClient(this.appId);
 
     // Exercise 4
     // TODO: Initialize the RemoteMongoClient
@@ -71,29 +70,13 @@ class App extends Component {
     // Exercise 3
     // TODO: Initialize the AWS Service Client
 
-    // Exercise 2
-    // TODO: Change the following line to check if
-    // client is already logged in.
-    const isAuthed = false
+    const isAuthed = this.client.auth.isLoggedIn
     if (isAuthed) {
       const email = this.client.auth.user.profile.email
       const entries = await this.getEntries()
       this.setState({ isAuthed, email, entries })
     }
 
-    // MOCK START
-    // TODO: Remove this as part of Exercise 2
-    this.client = {
-      auth: {
-        user: {
-          id: '12345',
-          profile: {
-            email: ''
-          }
-        }
-      }
-    }
-    // MOCK END
   }
 
   login = async (email, password) => {
@@ -102,8 +85,9 @@ class App extends Component {
     if (isAuthed) {
       return
     }
-    // Exercise 2
-    // TODO: Use the client to log in
+
+    const credential = new UserPasswordCredential(email, password)
+    const user = await this.client.auth.loginWithCredential(credential)
 
     const entries = await this.getEntries()
     this.setState({
@@ -114,8 +98,7 @@ class App extends Component {
   }
 
   logout = async () => {
-    // Exercise 2
-    // TODO: Use the client to log out
+    this.client.auth.logout()
 
     this.setState({ isAuthed: false, email: '', entries: [] })
   }
